@@ -13,7 +13,7 @@
 */
 
 //Disable anoying warnings and notices
-error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+error_reporting(E_ALL);
 
 //Change to correct working directory to be able to execute the script from everywhere
 chdir(__DIR__);
@@ -85,7 +85,14 @@ for ($i = 0; $i < $entries->length; $i++)
 		$class_inherits = $class_xpath->evaluate("//inheritancegraph", $class_doc);
 		
 		//Save include file
-		$includes[$class_xpath->evaluate("//includes", $class_doc)->item(0)->nodeValue]++;
+		if (isset($includes[$class_xpath->evaluate("//includes", $class_doc)->item(0)->nodeValue]))
+		{
+			  $includes[$class_xpath->evaluate("//includes", $class_doc)->item(0)->nodeValue] ++;
+		}
+		else
+		{
+        		 $includes[$class_xpath->evaluate("//includes", $class_doc)->item(0)->nodeValue] = 1;
+		}
 		
 		if($class_inherits->length > 0)
 		{
@@ -204,8 +211,15 @@ for ($i = 0; $i < $entries->length; $i++)
 					{
 						$parameters_type[] =  str_replace(array(" *", " &"), array("*", "&"), $class_xpath->evaluate("type", $function_parameters->item($parameter))->item(0)->nodeValue);
 						
-						$parameters_name[] =  $class_xpath->evaluate("declname", $function_parameters->item($parameter))->item(0)->nodeValue;
-						
+						if ($class_xpath->evaluate("declname", $function_parameters->item($parameter))->length === 0)
+                  				{
+                     					$parameters_name[] = NULL;
+                  				}
+                  				else
+                  				{
+                     					$parameters_name[] = $class_xpath->evaluate("declname", $function_parameters->item($parameter))->item(0)->nodeValue;
+                  				}
+                  				
 						//Check if parameter is array
 						if($class_xpath->evaluate("array", $function_parameters->item($parameter))->length > 0)
 						{
@@ -331,7 +345,14 @@ for ($i = 0; $i < $entries->length; $i++)
 			//Store not handled members of the class
 			else
 			{
-				$class_not_handle[$class_member->item($member)->getAttribute("kind")]++;
+				if(isset($class_not_handle[$class_member->item($member)->getAttribute("kind")]))
+            			{
+               				$class_not_handle[$class_member->item($member)->getAttribute("kind")] ++;
+            			}
+            			else
+            			{
+               				$class_not_handle[$class_member->item($member)->getAttribute("kind")] = 1;
+            			}
 			}
 		}
 	}
@@ -359,8 +380,15 @@ for ($i = 0; $i < $entries->length; $i++)
 			if($file_members->item($member)->getAttribute("kind") == "define")
 			{
 				$define_name = $file_xpath->evaluate("name", $file_members->item($member))->item(0)->nodeValue;
-				$define_initializer = $file_xpath->evaluate("initializer", $file_members->item($member))->item(0)->nodeValue;
-				
+				if ($file_xpath->evaluate("initializer", $file_members->item($member))->length === 0)
+            			{
+               				$define_initializer = NULL;
+            			}
+            			else
+            			{
+               				$define_initializer = $file_xpath->evaluate("initializer", $file_members->item($member))->item(0)->nodeValue;
+            			}
+            			
 				//Skip macro function defines
 				if($file_xpath->evaluate("param", $file_members->item($member))->length > 0)
 				{
@@ -440,8 +468,15 @@ for ($i = 0; $i < $entries->length; $i++)
 						for($function_parameter=0; $function_parameter<$function_parameters->length; $function_parameter++)
 						{
 							$parameters_type[] = str_replace(array(" *", " &"), array("*", "&"), $file_xpath->evaluate("type", $function_parameters->item($function_parameter))->item(0)->nodeValue);
-							$parameters_name[] = $file_xpath->evaluate("declname", $function_parameters->item($function_parameter))->item(0)->nodeValue;
-							
+							if ($file_xpath->evaluate("declname", $function_parameters->item($function_parameter))->length === 0)
+                 					{
+                        					$parameters_name[] = NULL;
+                     					}
+                     					else
+                     					{
+                        					$parameters_name[] = $file_xpath->evaluate("declname", $function_parameters->item($function_parameter))->item(0)->nodeValue;
+                     					}
+                     					
 							//Check if parameter is array
 							if($file_xpath->evaluate("array", $function_parameters->item($function_parameter))->length > 0)
 							{
@@ -548,7 +583,14 @@ for ($i = 0; $i < $entries->length; $i++)
 	//Store compound kinds on index.xml not handled
 	else
 	{
-		$compound_not_handle[$kind]++;
+		if (isset($compound_not_handle[$kind]))
+      		{
+         		$compound_not_handle[$kind] ++;
+      		}
+      		else
+      		{
+         		$compound_not_handle[$kind] = 1;
+      		}
 	}
 }
 
